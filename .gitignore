@@ -1,0 +1,2 @@
+# Ignore real .env file with secrets - use .env.example as template
+srcs/.env
