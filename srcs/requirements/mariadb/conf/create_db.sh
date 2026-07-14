@@ -2,6 +2,15 @@
 
 set -eu
 
+# Read passwords from secrets if available, otherwise from environment
+if [ -f "/run/secrets/db_root_password" ]; then
+    MYSQL_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
+fi
+
+if [ -f "/run/secrets/db_password" ]; then
+    MYSQL_PASSWORD=$(cat /run/secrets/db_password)
+fi
+
 # Start MariaDB without networking to set up the database
 service mariadb start
 

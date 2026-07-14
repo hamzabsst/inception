@@ -4,6 +4,15 @@ set -eu
 
 WORDPRESS_DIR="/var/www/html"
 
+# Read credentials from secrets if available
+if [ -f "/run/secrets/credentials" ]; then
+    source /run/secrets/credentials
+fi
+
+if [ -f "/run/secrets/db_password" ]; then
+    WORDPRESS_DB_PASSWORD=$(cat /run/secrets/db_password)
+fi
+
 # Wait for MariaDB to be ready (use MYSQL_PWD to avoid password in process list)
 export MYSQL_PWD="${WORDPRESS_DB_PASSWORD}"
 until mysqladmin ping -h "${WORDPRESS_DB_HOST%%:*}" -u "${WORDPRESS_DB_USER}" --silent 2>/dev/null; do
@@ -30,7 +39,7 @@ if [ ! -f "${WORDPRESS_DIR}/wp-config.php" ]; then
     wp core install \
         --allow-root \
         --path="${WORDPRESS_DIR}" \
-        --url="${DOMAIN_NAME}" \
+        --url="https://${DOMAIN_NAME}" \
         --title="${WP_TITLE}" \
         --admin_user="${WP_ADMIN_USER}" \
         --admin_password="${WP_ADMIN_PASSWORD}" \

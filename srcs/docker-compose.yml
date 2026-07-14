@@ -19,6 +19,14 @@ volumes:
       o: bind
       device: /home/${USER}/data/wordpress
 
+secrets:
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  db_password:
+    file: ../secrets/db_password.txt
+  credentials:
+    file: ../secrets/credentials.txt
+
 services:
 
   mariadb:
@@ -32,6 +40,12 @@ services:
       - mariadb:/var/lib/mysql
     env_file:
       - .env
+    secrets:
+      - db_root_password
+      - db_password
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
     restart: unless-stopped
 
   wordpress:
@@ -45,6 +59,12 @@ services:
       - wordpress:/var/www/html
     env_file:
       - .env
+    secrets:
+      - credentials
+      - db_password
+    environment:
+      CREDENTIALS_FILE: /run/secrets/credentials
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
     depends_on:
       - mariadb
     restart: unless-stopped
