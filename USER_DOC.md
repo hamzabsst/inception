@@ -2,17 +2,6 @@
 
 This guide explains how end users and administrators can manage and use the Inception WordPress infrastructure.
 
-## Table of Contents
-
-1. [Services Overview](#services-overview)
-2. [Quick Start](#quick-start)
-3. [Accessing the Website](#accessing-the-website)
-4. [Managing Credentials](#managing-credentials)
-5. [Health Checks & Troubleshooting](#health-checks--troubleshooting)
-6. [Backup & Recovery](#backup--recovery)
-
----
-
 ## Services Overview
 
 The Inception project provides three interconnected services:
@@ -47,7 +36,6 @@ The Inception project provides three interconnected services:
 ### Starting the Services
 
 ```bash
-cd /path/to/inception
 make up
 ```
 

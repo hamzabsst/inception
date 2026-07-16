@@ -1,12 +1,14 @@
 FROM debian:bullseye
 
-RUN apt-get update && apt-get install -y \
-    mariadb-server \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+	apt-get install -y mariadb-server && \
+	rm -rf /var/lib/apt/lists/*
 
-COPY conf/create_db.sh /usr/local/bin/create_db.sh
-RUN chmod +x /usr/local/bin/create_db.sh
+#COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
+COPY conf/entrypoint.sh /usr/local/bin/
 
-EXPOSE 3306
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
-ENTRYPOINT ["/usr/local/bin/create_db.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+CMD ["mariadbd"]
