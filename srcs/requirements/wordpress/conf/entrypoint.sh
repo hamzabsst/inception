@@ -46,14 +46,20 @@ if [ ! -f "${WORDPRESS_DIR}/wp-config.php" ]; then
         --admin_email="${WP_ADMIN_EMAIL}" \
         --skip-email
 
-    # Create a regular user
-    wp user create \
-        --allow-root \
-        --path="${WORDPRESS_DIR}" \
-        "${WP_USER}" "${WP_USER_EMAIL}" \
-        --role=author \
-        --user_pass="${WP_USER_PASSWORD}"
+    # Create a regular user (only if it doesn't exist)
+    if ! wp user get "${WP_USER}" --allow-root --path="${WORDPRESS_DIR}" >/dev/null 2>&1; then
+        wp user create \
+            --allow-root \
+            --path="${WORDPRESS_DIR}" \
+            "${WP_USER}" "${WP_USER_EMAIL}" \
+            --role=author \
+            --user_pass="${WP_USER_PASSWORD}"
+    fi
 fi
+
+# Create PHP-FPM runtime directory
+mkdir -p /run/php
+chown www-data:www-data /run/php
 
 # Start PHP-FPM in the foreground
 exec php-fpm7.4 -F

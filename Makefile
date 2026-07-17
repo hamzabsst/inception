@@ -24,7 +24,7 @@ clean: down
 fclean:
 	@docker compose -f $(COMPOSE_FILE) down -v
 	@docker system prune -f
-	@rm -rf $(DATA_DIR)
+	@rm -rf $(DATA_DIR) 2>/dev/null || true
 
 logs:
 	@docker compose -f $(COMPOSE_FILE) logs -f
