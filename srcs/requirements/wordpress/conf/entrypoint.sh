@@ -5,13 +5,9 @@ set -eu
 WORDPRESS_DIR="/var/www/html"
 
 
-if [ -f "/run/secrets/credentials" ]; then
-	source /run/secrets/credentials
-fi
-
-if [ -f "/run/secrets/db_password" ]; then
-	WORDPRESS_DB_PASSWORD=$(cat /run/secrets/db_password)
-fi
+WORDPRESS_DB_PASSWORD=$(cat /run/secrets/db_password)
+WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_password)
+WP_USER_PASSWORD=$(cat /run/secrets/wp_user_password)
 
 
 export MYSQL_PWD="${WORDPRESS_DB_PASSWORD}"
@@ -39,7 +35,7 @@ if [ ! -f "${WORDPRESS_DIR}/wp-config.php" ]; then
 	wp core install \
 		--allow-root \
 		--path="${WORDPRESS_DIR}" \
-		--url="https://${DOMAIN_NAME}:8443" \
+		--url="${DOMAIN_NAME}" \
 		--title="${WP_TITLE}" \
 		--admin_user="${WP_ADMIN_USER}" \
 		--admin_password="${WP_ADMIN_PASSWORD}" \
