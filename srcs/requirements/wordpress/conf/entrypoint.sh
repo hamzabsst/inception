@@ -23,7 +23,9 @@ unset MYSQL_PWD
 
 
 if [ ! -f "${WORDPRESS_DIR}/wp-config.php" ]; then
-	wp core download --allow-root --path="${WORDPRESS_DIR}"
+	if [ ! -f "${WORDPRESS_DIR}/wp-load.php" ]; then
+		wp core download --allow-root --path="${WORDPRESS_DIR}"
+	fi
 
 	wp config create \
 		--allow-root \
