@@ -4,62 +4,59 @@ set -eu
 
 WORDPRESS_DIR="/var/www/html"
 
-# Read credentials from secrets if available
+
 if [ -f "/run/secrets/credentials" ]; then
-    source /run/secrets/credentials
+	source /run/secrets/credentials
 fi
 
 if [ -f "/run/secrets/db_password" ]; then
-    WORDPRESS_DB_PASSWORD=$(cat /run/secrets/db_password)
+	WORDPRESS_DB_PASSWORD=$(cat /run/secrets/db_password)
 fi
 
-# Wait for MariaDB to be ready (use MYSQL_PWD to avoid password in process list)
+
 export MYSQL_PWD="${WORDPRESS_DB_PASSWORD}"
 until mysqladmin ping -h "${WORDPRESS_DB_HOST%%:*}" -u "${WORDPRESS_DB_USER}" --silent 2>/dev/null; do
-    echo "Waiting for MariaDB..."
-    sleep 2
+	echo "Waiting for MariaDB..."
+	sleep 2
 done
 unset MYSQL_PWD
 
-# Download WordPress if not already present
+
 if [ ! -f "${WORDPRESS_DIR}/wp-config.php" ]; then
-    # Download WordPress core
-    wp core download --allow-root --path="${WORDPRESS_DIR}"
+	wp core download --allow-root --path="${WORDPRESS_DIR}"
 
-    # Create wp-config.php
-    wp config create \
-        --allow-root \
-        --path="${WORDPRESS_DIR}" \
-        --dbname="${WORDPRESS_DB_NAME}" \
-        --dbuser="${WORDPRESS_DB_USER}" \
-        --dbpass="${WORDPRESS_DB_PASSWORD}" \
-        --dbhost="${WORDPRESS_DB_HOST}"
+	wp config create \
+		--allow-root \
+		--path="${WORDPRESS_DIR}" \
+		--dbname="${WORDPRESS_DB_NAME}" \
+		--dbuser="${WORDPRESS_DB_USER}" \
+		--dbpass="${WORDPRESS_DB_PASSWORD}" \
+		--dbhost="${WORDPRESS_DB_HOST}"
 
-    # Install WordPress
-    wp core install \
-        --allow-root \
-        --path="${WORDPRESS_DIR}" \
-        --url="https://${DOMAIN_NAME}" \
-        --title="${WP_TITLE}" \
-        --admin_user="${WP_ADMIN_USER}" \
-        --admin_password="${WP_ADMIN_PASSWORD}" \
-        --admin_email="${WP_ADMIN_EMAIL}" \
-        --skip-email
 
-    # Create a regular user (only if it doesn't exist)
-    if ! wp user get "${WP_USER}" --allow-root --path="${WORDPRESS_DIR}" >/dev/null 2>&1; then
-        wp user create \
-            --allow-root \
-            --path="${WORDPRESS_DIR}" \
-            "${WP_USER}" "${WP_USER_EMAIL}" \
-            --role=author \
-            --user_pass="${WP_USER_PASSWORD}"
-    fi
+	wp core install \
+		--allow-root \
+		--path="${WORDPRESS_DIR}" \
+		--url="https://${DOMAIN_NAME}:8443" \
+		--title="${WP_TITLE}" \
+		--admin_user="${WP_ADMIN_USER}" \
+		--admin_password="${WP_ADMIN_PASSWORD}" \
+		--admin_email="${WP_ADMIN_EMAIL}" \
+		--skip-email
+
+
+	if ! wp user get "${WP_USER}" --allow-root --path="${WORDPRESS_DIR}" >/dev/null 2>&1; then
+		wp user create \
+			--allow-root \
+			--path="${WORDPRESS_DIR}" \
+			"${WP_USER}" "${WP_USER_EMAIL}" \
+			--role=author \
+			--user_pass="${WP_USER_PASSWORD}"
+	fi
 fi
 
-# Create PHP-FPM runtime directory
+
 mkdir -p /run/php
 chown www-data:www-data /run/php
 
-# Start PHP-FPM in the foreground
 exec php-fpm7.4 -F

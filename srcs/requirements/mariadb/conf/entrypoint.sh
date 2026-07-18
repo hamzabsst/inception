@@ -5,7 +5,6 @@ set -eu
 mkdir -p /run/mysqld
 chown mysql:mysql /run/mysqld
 
-# Support both plain env vars and Docker secrets (_FILE convention)
 file_env() {
 	var="$1"
 	file_var="${var}_FILE"
@@ -24,12 +23,8 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
 		--datadir=/var/lib/mysql \
 		> /dev/null
 
-	# Start mariadbd temporarily (no networking) so we can run the
-	# setup SQL, then shut it down before exec'ing the real,
-	# foreground process that becomes PID 1's actual server.
 	mysqld_safe --datadir=/var/lib/mysql --skip-networking &
 
-	# Wait until the temporary server is ready to accept commands
 	until mysqladmin ping >/dev/null 2>&1; do
 		sleep 1
 	done
