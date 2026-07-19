@@ -5,11 +5,12 @@ RUN apt-get update && \
 	rm -rf /var/lib/mysql/* && \
 	rm -rf /var/lib/apt/lists/*
 
-COPY conf/50-server.cnf /etc/mysql/mariadb.conf.d/
 COPY conf/entrypoint.sh /usr/local/bin/
 
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+EXPOSE 3306
 
 CMD ["mariadbd", "--user=mysql"]
