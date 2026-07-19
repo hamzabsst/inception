@@ -86,7 +86,7 @@ services:
     volumes:
       - wordpress:/var/www/html
     ports:
-      - "8443:443"
+      - "443:443"
     env_file:
       - .env
     depends_on:
