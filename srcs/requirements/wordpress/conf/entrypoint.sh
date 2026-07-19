@@ -19,36 +19,34 @@ unset MYSQL_PWD
 
 
 if [ ! -f "${WP_PATH}/wp-config.php" ]; then
-
 	wp core download --allow-root --path="${WP_PATH}"
-
 	wp config create --allow-root \
 		--path="${WP_PATH}" \
 		--dbname="${DB_NAME}" \
 		--dbuser="${DB_USER}" \
 		--dbpass="${DB_PASSWORD}" \
 		--dbhost="${DB_HOST}"
+fi
 
-
+if ! wp core is-installed --allow-root --path="${WP_PATH}" 2>/dev/null; then
 	wp core install \
 		--allow-root \
 		--path="${WP_PATH}" \
-		--url="https://${DOMAIN_NAME}:8443" \
+		--url="https://${DOMAIN_NAME}" \
 		--title="${WP_TITLE}" \
 		--admin_user="${WP_ADMIN}" \
 		--admin_password="${WP_ADMIN_PASSWORD}" \
 		--admin_email="${WP_ADMIN_EMAIL}" \
 		--skip-email
+fi
 
-
-	if ! wp user get "${WP_USER}" --allow-root --path="${WP_PATH}" >/dev/null 2>&1; then
-		wp user create \
-			--allow-root \
-			--path="${WP_PATH}" \
-			"${WP_USER}" "${WP_USER_EMAIL}" \
-			--role=author \
-			--user_pass="${WP_USER_PASSWORD}"
-	fi
+if ! wp user get "${WP_USER}" --allow-root --path="${WP_PATH}" >/dev/null 2>&1; then
+	wp user create \
+		--allow-root \
+		--path="${WP_PATH}" \
+		"${WP_USER}" "${WP_USER_EMAIL}" \
+		--role=author \
+		--user_pass="${WP_USER_PASSWORD}"
 fi
 
 
