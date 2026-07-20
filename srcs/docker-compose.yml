@@ -30,6 +30,7 @@ secrets:
 services:
 
   mariadb:
+    image: mariadb
     build:
       context: requirements/mariadb
       dockerfile: Dockerfile
@@ -51,6 +52,7 @@ services:
     restart: unless-stopped
 
   wordpress:
+    image: wordpress
     build:
       context: requirements/wordpress
       dockerfile: Dockerfile
@@ -77,6 +79,7 @@ services:
     restart: unless-stopped
 
   nginx:
+    image: nginx
     build:
       context: requirements/nginx
       dockerfile: Dockerfile

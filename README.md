@@ -59,16 +59,22 @@ Inception is a Docker-based infrastructure project that containerizes a WordPres
    ```bash
    nano secrets/db_root_password.txt    # Set MariaDB root password
    nano secrets/db_password.txt         # Set database user password
-   nano secrets/credentials.txt         # Set WordPress admin credentials
+   nano secrets/wp_admin_password.txt   # Set WordPress admin password
+   nano secrets/wp_user_password.txt    # Set WordPress user password
    ```
 
-2. **Configure domain** in `/etc/hosts`:
+2. **Review runtime settings** in `srcs/.env`:
+   ```bash
+   cat srcs/.env
+   ```
+
+3. **Configure domain** in `/etc/hosts`:
    ```bash
    sudo nano /etc/hosts
    # Add: 127.0.0.1 hbousset.42.fr
    ```
 
-3. **Build and launch**:
+4. **Build and launch**:
    ```bash
    make all        # Build images and start containers
    make status     # Check service status
