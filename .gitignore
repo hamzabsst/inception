@@ -1,0 +1,24 @@
+# Environment & secrets — never commit real credentials
+srcs/.env
+.env
+secrets/*.txt
+secrets/*.password
+!secrets/.gitkeep
+
+# Persistent data (bind-mounted, shouldn't live in the repo anyway)
+data/
+**/data/mariadb/
+**/data/wordpress/
+
+# Docker
+*.log
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# VS Code (optional — keep if you don't want personal editor config committed)
+.vscode/

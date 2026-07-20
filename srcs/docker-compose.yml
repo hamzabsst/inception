@@ -96,3 +96,13 @@ services:
       wordpress:
         condition: service_healthy
     restart: unless-stopped
+
+  bonus-site:
+    image: bonus-site
+    build:
+      context: requirements/bonus/static-site
+      dockerfile: Dockerfile
+    container_name: bonus-site
+    ports:
+      - "8081:80"
+    restart: unless-stopped
