@@ -40,6 +40,15 @@ if ! wp core is-installed --allow-root --path="${WP_PATH}" 2>/dev/null; then
 		--skip-email
 fi
 
+REDIS_PASSWORD=$(cat /run/secrets/redis_password)
+
+if ! wp plugin is-installed redis-cache --allow-root --path="${WP_PATH}"; then
+	wp plugin install redis-cache --activate --allow-root --path="${WP_PATH}"
+	wp config set WP_REDIS_HOST redis --allow-root --path="${WP_PATH}"
+	wp config set WP_REDIS_PASSWORD "${REDIS_PASSWORD}" --allow-root --path="${WP_PATH}"
+	wp redis enable --allow-root --path="${WP_PATH}"
+fi
+
 if ! wp user get "${WP_USER}" --allow-root --path="${WP_PATH}" >/dev/null 2>&1; then
 	wp user create \
 		--allow-root \
