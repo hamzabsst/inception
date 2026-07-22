@@ -69,6 +69,7 @@ services:
       - wp_admin_password
       - wp_user_password
       - db_password
+      - redis_password
     depends_on:
       mariadb:
         condition: service_healthy
