@@ -53,6 +53,24 @@ services:
       retries: 10
     restart: unless-stopped
 
+  redis:
+    image: redis
+    build:
+      context: requirements/bonus/redis
+      dockerfile: Dockerfile
+    container_name: redis
+    networks:
+      - inception
+    secrets:
+      - redis_password
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$(cat /run/secrets/redis_password)\" ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
   wordpress:
     image: wordpress
     build:
@@ -72,6 +90,8 @@ services:
       - redis_password
     depends_on:
       mariadb:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "bash", "-c", "echo > /dev/tcp/127.0.0.1/9000"]
@@ -98,18 +118,6 @@ services:
     depends_on:
       wordpress:
         condition: service_healthy
-    restart: unless-stopped
-
-  redis:
-    image: redis
-    build:
-      context: requirements/bonus/redis
-      dockerfile: Dockerfile
-    container_name: redis
-    networks:
-      - inception
-    secrets:
-      - redis_password
     restart: unless-stopped
 
   adminer:
