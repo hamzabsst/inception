@@ -82,6 +82,19 @@
       margin-bottom: 0.35rem;
       color: var(--accent);
     }
+
+    .footer {
+      margin-top: 2rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .footer strong {
+      color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -89,12 +102,16 @@
     <span class="eyebrow">Bonus service</span>
     <h1>Static showcase site</h1>
     <p>This extra container exists only for the bonus part. It is a simple static website served by its own Dockerfile and container.</p>
-    <p>Use this as an easy bonus proof: it is isolated, reproducible, and does not interfere with the WordPress stack.</p>
+    <p>this as an easy bonus proof: it is isolated, reproducible, and does not interfere with the WordPress stack.</p>
 
     <div class="grid">
       <div class="item"><strong>Service</strong>Static website</div>
       <div class="item"><strong>Port</strong>8081 on the host</div>
       <div class="item"><strong>Stack</strong>Debian + NGINX</div>
+    </div>
+
+    <div class="footer">
+      Created by <strong>hbousset</strong>
     </div>
   </main>
 </body>

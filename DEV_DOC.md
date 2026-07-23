@@ -9,22 +9,19 @@ git clone <repository_url>
 cd inception
 ```
 
-Create `srcs/.env` with your config (DB name/user, `WP_ADMIN`, `WP_ADMIN_EMAIL`, `WP_USER`, `DOMAIN_NAME`, etc.), and:
-
-```bash
-mkdir -p ~/data/mariadb ~/data/wordpress
-```
+Create `srcs/.env` (DB name/user, `WP_ADMIN`, `WP_ADMIN_EMAIL`, `WP_USER`, `DOMAIN_NAME`, etc.) and fill in `secrets/*.txt` (DB passwords, WP passwords, Redis password). `make up` creates the data directories automatically.
 
 ## Project Structure
 
-- `srcs/docker-compose.yml` — defines services, networks, volumes; containers reach each other by service name (`mariadb`, `wordpress`, `nginx`)
-- `srcs/requirements/*/Dockerfile` — one per service (nginx, wordpress, mariadb)
-- `srcs/requirements/*/conf/` — `entrypoint.sh`, `setup_wp.sh`, `nginx.conf.template`, `www.conf`
+- `srcs/docker-compose.yml` — services, network, volumes, secrets; containers reach each other by service name
+- `srcs/requirements/*/Dockerfile` — one per mandatory service (nginx, wordpress, mariadb)
+- `srcs/requirements/bonus/*/Dockerfile` — one per bonus service (redis, adminer, static-site)
+- `srcs/requirements/*/conf/` — entrypoint scripts and config templates per service
 
 ## Build & Run
 
 ```bash
-make all     # or `make up` — build images, start containers, init DB + WordPress
+make all     # or `make up` — build images, start all containers
 make re      # fclean + all — full rebuild
 make stop    # stop containers, keep volumes
 make start   # restart stopped containers
@@ -36,52 +33,52 @@ make logs    # tail all logs (or: docker compose -f srcs/docker-compose.yml logs
 
 Useful manual commands:
 ```bash
-docker compose -f srcs/docker-compose.yml build          # build only
-docker compose -f srcs/docker-compose.yml up             # foreground, see logs
-docker compose -f srcs/docker-compose.yml exec wordpress bash   # shell into a container
+docker compose -f srcs/docker-compose.yml build                 # build only
+docker compose -f srcs/docker-compose.yml up                    # foreground, see logs
+docker compose -f srcs/docker-compose.yml exec wordpress bash    # shell into a container
 ```
 
 ## Networking
 
-- Services resolve each other by name: `mariadb:3306`, `wordpress:9000`, `nginx:443`
-- Only NGINX exposes a port to the host (`443`) — WordPress and MariaDB stay internal
-- Inspect: `docker network ls`, `docker network inspect inception_inception`
+- Services resolve each other by name: `mariadb:3306`, `wordpress:9000`, `nginx:443`, `redis:6379`
+- Only NGINX (443), Adminer (8080), and the static site (8081) expose ports to the host — everything else stays internal
+- Inspect: `docker network ls`, `docker network inspect srcs_inception`
 
 ## Data & Volumes
 
-Data lives on the host via bind mounts, not named volumes:
+Named volumes, bound to a fixed host path via `driver_opts`:
 ```
-~/data/mariadb     ->  /var/lib/mysql (in mariadb container)
-~/data/wordpress   ->  WordPress files (in wordpress container)
+/home/<user>/data/mariadb    ->  /var/lib/mysql (mariadb container)
+/home/<user>/data/wordpress  ->  /var/www/html (wordpress + nginx containers)
 ```
 
 ```bash
 docker volume ls
-docker volume inspect inception_wordpress
-du -sh ~/data/*
+docker volume inspect srcs_wordpress
+du -sh /home/<user>/data/*
 ```
 
 **Backup:**
 ```bash
-tar -czf inception_backup_$(date +%Y%m%d_%H%M%S).tar.gz ~/data/
+tar -czf inception_backup_$(date +%Y%m%d_%H%M%S).tar.gz /home/<user>/data/
 ```
 
 **Database dump/restore:**
 ```bash
 # dump
-docker compose -f srcs/docker-compose.yml exec mariadb mysqldump -u wp_user -p$MYSQL_PASSWORD wordpress_db > backup.sql
+docker compose -f srcs/docker-compose.yml exec mariadb mysqldump -u wp_user -p"$(cat secrets/db_password.txt)" wordpress > backup.sql
 
 # restore
-cat backup.sql | docker compose -f srcs/docker-compose.yml exec -T mariadb mysql -u wp_user -p$MYSQL_PASSWORD wordpress_db
+cat backup.sql | docker compose -f srcs/docker-compose.yml exec -T mariadb mysql -u wp_user -p"$(cat secrets/db_password.txt)" wordpress
 ```
 
-**Clean/remove volumes:** `docker volume prune` or `make fclean` (deletes data — use with care).
+**Remove volumes/data:** `make fclean` (deletes everything — use with care).
 
 ## Troubleshooting
 
-|         Problem               |                                           Fix                                                          |
-|-------------------------------|--------------------------------------------------------------------------------------------------------|
-| Permission denied on volume   | `sudo chown -R 999:999 ~/data/mariadb` (mysql user), `sudo chown -R 33:33 ~/data/wordpress` (www-data) |
-| Volumes look out of sync      | Check mounts: `docker compose -f srcs/docker-compose.yml exec <service> mount \| grep /var/www`        |
-| Container can't reach another | `docker compose -f srcs/docker-compose.yml exec wordpress ping mariadb`                                |
-| Check container env vars      | `docker inspect mariadb \| grep -A 20 Env`                                                             |
+|           Problem             |                                                   Fix                                                        |
+|-------------------------------|--------------------------------------------------------------------------------------------------------------|
+| Permission denied on volume   | `sudo chown -R 999:999 /home/<user>/data/mariadb`, `sudo chown -R 33:33 /home/<user>/data/wordpress`         |
+| Container can't reach another | `docker compose -f srcs/docker-compose.yml exec wordpress ping mariadb`                                      |
+| Redis not connected           | `docker compose -f srcs/docker-compose.yml exec wordpress wp redis status --allow-root --path=/var/www/html` |
+| Check container env vars      |  `docker inspect mariadb \| grep -A 20 Env`                                                                  |

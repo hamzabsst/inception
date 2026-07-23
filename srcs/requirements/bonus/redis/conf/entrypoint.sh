@@ -1,4 +1,5 @@
 #!/bin/sh
+
 set -eu
 
 REDIS_PASSWORD=$(cat /run/secrets/redis_password)

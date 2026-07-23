@@ -1,9 +1,9 @@
 # Environment & secrets — never commit real credentials
-srcs/.env
-.env
-secrets/*.txt
-secrets/*.password
-!secrets/.gitkeep
+# srcs/.env
+# .env
+# secrets/*.txt
+# secrets/*.password
+# !secrets/.gitkeep
 
 # Persistent data (bind-mounted, shouldn't live in the repo anyway)
 data/
