@@ -40,6 +40,23 @@ if ! wp core is-installed --allow-root --path="${WP_PATH}" 2>/dev/null; then
 		--skip-email
 fi
 
+if [ ! -f "${WP_PATH}/.provisioned" ]; then
+	# remove default content
+	wp post delete 1 --force --allow-root --path="${WP_PATH}" 2>/dev/null || true  # Hello World post
+	wp post delete 2 --force --allow-root --path="${WP_PATH}" 2>/dev/null || true  # Sample Page
+
+	# create a real homepage
+	HOME_ID=$(wp post create --allow-root --path="${WP_PATH}" \
+		--post_type=page --post_title="Home" \
+		--post_content="Welcome to my Inception project." \
+		--post_status=publish --porcelain)
+
+	wp option update show_on_front page --allow-root --path="${WP_PATH}"
+	wp option update page_on_front "${HOME_ID}" --allow-root --path="${WP_PATH}"
+
+	touch "${WP_PATH}/.provisioned"
+fi
+
 REDIS_PASSWORD=$(cat /run/secrets/redis_password)
 
 if ! wp plugin is-installed redis-cache --allow-root --path="${WP_PATH}"; then
