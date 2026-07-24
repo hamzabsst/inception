@@ -42,13 +42,13 @@ fi
 
 if [ ! -f "${WP_PATH}/.provisioned" ]; then
 	# remove default content
-	wp post delete 1 --force --allow-root --path="${WP_PATH}" 2>/dev/null || true  # Hello World post
-	wp post delete 2 --force --allow-root --path="${WP_PATH}" 2>/dev/null || true  # Sample Page
+	wp post delete 1 --force --allow-root --path="${WP_PATH}" 2>/dev/null || true
+	wp post delete 2 --force --allow-root --path="${WP_PATH}" 2>/dev/null || true  
 
 	# create a real homepage
 	HOME_ID=$(wp post create --allow-root --path="${WP_PATH}" \
 		--post_type=page --post_title="Home" \
-		--post_content="Welcome to my Inception project." \
+		--post_content="Welcome to hbousset Inception project." \
 		--post_status=publish --porcelain)
 
 	wp option update show_on_front page --allow-root --path="${WP_PATH}"

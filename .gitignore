@@ -1,4 +1,4 @@
-# Environment & secrets — never commit real credentials
+# # Environment & secrets — never commit real credentials
 # srcs/.env
 # .env
 # secrets/*.txt

@@ -1,15 +1,47 @@
 # Inception — Developer Guide
 
 ## Setup
-
-**Prerequisites:** Docker (v20.10+), Docker Compose, Make, Git.
+Prerequisites: Docker (v20.10+), Docker Compose, Make, Git.
 
 ```bash
 git clone <repository_url>
 cd inception
 ```
 
-Create `srcs/.env` (DB name/user, `WP_ADMIN`, `WP_ADMIN_EMAIL`, `WP_USER`, `DOMAIN_NAME`, etc.) and fill in `secrets/*.txt` (DB passwords, WP passwords, Redis password). `make up` creates the data directories automatically.
+Create the .env file in the same directory as docker-compose.yml (i.e. srcs/.env) with your DB name/user, WP_ADMIN, WP_ADMIN_EMAIL, WP_USER, DOMAIN_NAME, etc. Then fill in secrets/*.txt with real, unique passwords (DB root, DB user, WP admin, WP user, Redis).
+
+```bash
+# srcs/.env
+# WordPress
+DOMAIN_NAME=hbousset.42.fr
+WP_TITLE=Inception
+
+# MariaDB
+DB_DATABASE=wordpress
+DB_USER=user
+DB_HOST=mariadb
+DB_NAME=wordpress
+
+# WP admin settings
+WP_ADMIN=hamza
+WP_ADMIN_EMAIL=hamza@example.com
+
+# WP User settings
+WP_USER=user
+WP_USER_EMAIL=user@example.com
+```
+
+```bash
+mkdir -p secrets
+touch secrets/db_password.txt secrets/db_root_password.txt \
+      secrets/wp_user_password.txt secrets/wp_admin_password.txt \
+      secrets/redis_password.txt
+
+# generate strong random passwords instead of hardcoding weak values
+for f in db_password db_root_password wp_user_password wp_admin_password redis_password; do
+  openssl rand -base64 24 > secrets/${f}.txt
+done
+```
 
 ## Project Structure
 
